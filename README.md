@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ECS Next.js Application
 
-## Getting Started
+AWS ECS上にデプロイされるNext.jsアプリケーションです。CodeBuildとECRを使用したCI/CDパイプラインが構築されています。
 
-First, run the development server:
+## 技術スタック
+
+- **フレームワーク**: Next.js 15.5.4 (Turbopack対応)
+- **ランタイム**: React 19.1.0
+- **言語**: TypeScript
+- **スタイリング**: Tailwind CSS v4
+- **デプロイ**: AWS ECS Fargate
+- **CI/CD**: AWS CodeBuild + ECR
+
+## ローカル開発
 
 ```bash
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# ビルド
+npm run build
+
+# 本番サーバーの起動
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+開発サーバーは [http://localhost:3000](http://localhost:3000) で起動します。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## AWS デプロイメント
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 必要な環境変数
 
-## Learn More
+CodeBuildで以下の環境変数を設定してください：
 
-To learn more about Next.js, take a look at the following resources:
+- `AWS_ACCOUNT_ID`: AWSアカウントID
+- `AWS_DEFAULT_REGION`: デプロイ先リージョン (デフォルト: ap-northeast-1)
+- `IMAGE_REPO_NAME`: ECRリポジトリ名
+- `IMAGE_TAG`: イメージタグ (デフォルト: latest)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### デプロイフロー
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **CodeBuild**: `buildspec.yml`に基づいてビルド・ECRプッシュ
+2. **ECS**: `taskdef.json`の設定でFargateタスクを実行
+3. **ログ**: CloudWatch Logsで監視
 
-## Deploy on Vercel
+### Docker
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# イメージビルド
+docker build -f docker/Dockerfile -t ecs-next .
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# ローカル実行
+docker run -p 3000:3000 ecs-next
+```
+
+## プロジェクト構成
+
+```
+├── docker/
+│   └── Dockerfile          # マルチステージビルド設定
+├── src/                    # アプリケーションソース
+├── buildspec.yml          # CodeBuild設定
+├── taskdef.json           # ECSタスク定義
+└── package.json           # 依存関係・スクリプト
+```
