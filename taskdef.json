@@ -22,7 +22,7 @@
                 "secretOptions": []
             },
             "mountPoints": [],
-            "name": "next-",
+            "name": "next",
             "portMappings": [
                 {
                     "appProtocol": "http",
